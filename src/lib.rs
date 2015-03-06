@@ -13,7 +13,7 @@
 //! (http://doc.rust-lang.org/std/cmp/trait.Ord.html):
 //!
 //! ```rust
-//! use collect::compare::{Compare, natural};
+//! use compare::{Compare, natural};
 //! use std::cmp::Ordering::{Less, Equal, Greater};
 //!
 //! let a = &1;
@@ -28,7 +28,7 @@
 //! There are convenience methods for checking each of the six relations:
 //!
 //! ```rust
-//! use collect::compare::{Compare, natural};
+//! use compare::{Compare, natural};
 //!
 //! let a = &1;
 //! let b = &2;
@@ -48,7 +48,7 @@
 //! example, all comparators can be [reversed](trait.Compare.html#method.rev):
 //!
 //! ```rust
-//! use collect::compare::{Compare, natural};
+//! use compare::{Compare, natural};
 //! use std::cmp::Ordering::Greater;
 //!
 //! let cmp = natural().rev();
@@ -60,7 +60,7 @@
 //! can be compared by their length instead of their contents:
 //!
 //! ```rust
-//! use collect::compare::Compare;
+//! use compare::Compare;
 //! use std::cmp::Ordering::{Less, Greater};
 //!
 //! let a = vec![1, 2, 3];
@@ -79,7 +79,7 @@
 //! equal, by another:
 //!
 //! ```rust
-//! use collect::compare::Compare;
+//! use compare::Compare;
 //! use std::cmp::Ordering::{Less, Equal, Greater};
 //!
 //! struct Pet { name: &'static str, age: u8 }
@@ -109,7 +109,7 @@
 //! previous example:
 //!
 //! ```rust
-//! use collect::compare::{Compare, Extract, natural};
+//! use compare::{Compare, Extract, natural};
 //! use std::cmp::Ordering::{Less, Greater};
 //!
 //! struct Pet { name: &'static str, age: u8 }
@@ -138,7 +138,7 @@ use std::fmt::{self, Debug};
 /// # Examples
 ///
 /// ```rust
-/// use collect::compare::{Extract, natural, max};
+/// use compare::{Extract, natural, max};
 ///
 /// struct Foo { key: char, id: u8 }
 ///
@@ -164,7 +164,7 @@ pub fn max<'a, C: ?Sized, T: ?Sized>(cmp: &C, lhs: &'a T, rhs: &'a T) -> &'a T
 /// # Examples
 ///
 /// ```rust
-/// use collect::compare::{Extract, natural, min};
+/// use compare::{Extract, natural, min};
 ///
 /// struct Foo { key: char, id: u8 }
 ///
@@ -229,7 +229,7 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     /// # Examples
     ///
     /// ```rust
-    /// use collect::compare::{Compare, natural};
+    /// use compare::{Compare, natural};
     /// use std::cmp::Ordering::{Less, Equal, Greater};
     ///
     /// let a_str = "a";
@@ -252,7 +252,7 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     /// # Examples
     ///
     /// ```rust
-    /// use collect::compare::{Compare, natural};
+    /// use compare::{Compare, natural};
     /// use std::cmp::Ordering::{Less, Equal, Greater};
     ///
     /// let a = &1;
@@ -273,7 +273,7 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     /// # Examples
     ///
     /// ```rust
-    /// use collect::compare::Compare;
+    /// use compare::Compare;
     /// use std::cmp::Ordering::{Less, Equal, Greater};
     ///
     /// let cmp = |lhs: &u8, rhs: &u16| (*lhs as u16).cmp(rhs);
@@ -297,7 +297,7 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     /// # Examples
     ///
     /// ```rust
-    /// use collect::compare::Compare;
+    /// use compare::Compare;
     /// use std::cmp::Ordering::{Less, Equal};
     ///
     /// struct Foo { key1: char, key2: u8 }
@@ -419,7 +419,7 @@ impl<C, Lb: ?Sized, Rb: ?Sized> Debug for Borrow<C, Lb, Rb>
 /// # Examples
 ///
 /// ```rust
-/// use collect::compare::{Compare, Extract, natural};
+/// use compare::{Compare, Extract, natural};
 /// use std::cmp::Ordering::Greater;
 ///
 /// let a = vec![1, 2, 3];
@@ -538,7 +538,7 @@ impl<C, D, Lhs: ?Sized, Rhs: ?Sized> Compare<Lhs, Rhs> for Then<C, D>
 /// # Examples
 ///
 /// ```rust
-/// use collect::compare::{Compare, natural};
+/// use compare::{Compare, natural};
 /// use std::cmp::Ordering::{Less, Equal, Greater};
 ///
 /// let a = &1;
