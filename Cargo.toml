@@ -12,5 +12,6 @@ authors = [
 
 repository = "https://github.com/contain-rs/compare"
 homepage = "https://github.com/contain-rs/compare"
+documentation = "https://contain-rs.github.io/compare/compare"
 keywords = ["data-structures"]
 readme = "README.md"
