@@ -2,7 +2,6 @@
 
 set -o errexit -o nounset
 
-cargo doc --no-deps
 rev=$(git rev-parse --short HEAD)
 
 cd target/doc
