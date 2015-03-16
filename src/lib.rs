@@ -511,6 +511,7 @@ impl<C, D, Lhs: ?Sized, Rhs: ?Sized> Compare<Lhs, Rhs> for Then<C, D>
 /// ```
 pub struct Natural<T: Ord + ?Sized>(PhantomData<fn(&T)>);
 
+/// Returns a comparator that delegates to `Ord`.
 pub fn natural<T: Ord + ?Sized>() -> Natural<T> {
     Natural(PhantomData)
 }
