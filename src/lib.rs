@@ -322,14 +322,6 @@ impl<F: ?Sized, Lhs: ?Sized, Rhs: ?Sized> Compare<Lhs, Rhs> for F
     fn compare(&self, lhs: &Lhs, rhs: &Rhs) -> Ordering { (*self)(lhs, rhs) }
 }
 
-impl<'a, Lhs: ?Sized, Rhs: ?Sized, C: ?Sized> Compare<Lhs, Rhs> for &'a C
-    where C: Compare<Lhs, Rhs> {
-
-    fn compare(&self, lhs: &Lhs, rhs: &Rhs) -> Ordering {
-        Compare::compare(*self, lhs, rhs)
-    }
-}
-
 /// A comparator that borrows its parameters before comparing them.
 ///
 /// See [`Compare::borrow`](trait.Compare.html#method.borrow) for an example.
