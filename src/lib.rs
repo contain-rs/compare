@@ -132,7 +132,7 @@ use std::default::Default;
 use std::marker::PhantomData;
 use std::fmt::{self, Debug};
 
-/// Returns the maximum of two values according to the given comparator, or `lhs` if they
+/// Returns the maximum of two values according to the given comparator, or `rhs` if they
 /// are equal.
 ///
 /// # Examples
@@ -147,7 +147,7 @@ use std::fmt::{self, Debug};
 /// let f3 = &Foo { key: 'b', id: 3};
 ///
 /// let cmp = Extract::new(|f: &Foo| f.key, natural());
-/// assert_eq!(max(&cmp, f1, f2).id, f1.id);
+/// assert_eq!(max(&cmp, f1, f2).id, f2.id);
 /// assert_eq!(max(&cmp, f1, f3).id, f3.id);
 /// ```
 // FIXME: convert to default method on `Compare` once where clauses permit equality
@@ -155,7 +155,7 @@ use std::fmt::{self, Debug};
 pub fn max<'a, C: ?Sized, T: ?Sized>(cmp: &C, lhs: &'a T, rhs: &'a T) -> &'a T
     where C: Compare<T> {
 
-    if cmp.compares_ge(lhs, rhs) { lhs } else { rhs }
+    if cmp.compares_ge(rhs, lhs) { rhs } else { lhs }
 }
 
 /// Returns the minimum of two values according to the given comparator, or `lhs` if they
@@ -320,14 +320,6 @@ impl<F: ?Sized, Lhs: ?Sized, Rhs: ?Sized> Compare<Lhs, Rhs> for F
     where F: Fn(&Lhs, &Rhs) -> Ordering {
 
     fn compare(&self, lhs: &Lhs, rhs: &Rhs) -> Ordering { (*self)(lhs, rhs) }
-}
-
-impl<'a, Lhs: ?Sized, Rhs: ?Sized, C: ?Sized> Compare<Lhs, Rhs> for &'a C
-    where C: Compare<Lhs, Rhs> {
-
-    fn compare(&self, lhs: &Lhs, rhs: &Rhs) -> Ordering {
-        Compare::compare(*self, lhs, rhs)
-    }
 }
 
 /// A comparator that borrows its parameters before comparing them.
