@@ -366,7 +366,7 @@ impl<C, Lhs: ?Sized, Rhs: ?Sized, Lb: ?Sized, Rb: ?Sized> Compare<Lhs, Rhs> for 
 impl<C, Lb: ?Sized, Rb: ?Sized> Clone for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Clone {
 
-    fn clone(&self) -> Borrowing<C, Lb, Rb> { Borrowing(self.0.clone(), PhantomData) }
+    fn clone(&self) -> Self { Borrowing(self.0.clone(), PhantomData) }
 }
 
 impl<C, Lb: ?Sized, Rb: ?Sized> Copy for Borrowing<C, Lb, Rb>
@@ -375,13 +375,13 @@ impl<C, Lb: ?Sized, Rb: ?Sized> Copy for Borrowing<C, Lb, Rb>
 impl<C, Lb: ?Sized, Rb: ?Sized> Default for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Default {
 
-    fn default() -> Borrowing<C, Lb, Rb> { Borrowing(Default::default(), PhantomData) }
+    fn default() -> Self { Borrowing(Default::default(), PhantomData) }
 }
 
 impl<C, Lb: ?Sized, Rb: ?Sized> PartialEq for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + PartialEq {
 
-    fn eq(&self, other: &Borrowing<C, Lb, Rb>) -> bool { self.0 == other.0 }
+    fn eq(&self, other: &Self) -> bool { self.0 == other.0 }
 }
 
 impl<C, Lb: ?Sized, Rb: ?Sized> Eq for Borrowing<C, Lb, Rb> where C: Compare<Lb, Rb> + Eq {}
@@ -417,7 +417,7 @@ pub struct Extract<E, C> {
 impl<E, K> Extract<E, Natural<K>> where K: Ord {
     /// Returns a comparator that extracts a sort key using `ext` and compares it according to its
     /// natural ordering.
-    pub fn new<T: ?Sized>(ext: E) -> Extract<E, Natural<K>> where E: Fn(&T) -> K {
+    pub fn new<T: ?Sized>(ext: E) -> Self where E: Fn(&T) -> K {
         Extract { ext: ext, cmp: natural() }
     }
 }
@@ -427,7 +427,7 @@ impl<E, K> Extract<E, Natural<K>> where K: Ord {
 impl<E, C> Extract<E, C> {
     /// Returns a comparator that extracts a sort key using `ext` and compares it using
     /// `cmp`.
-    pub fn with_cmp<T: ?Sized, K>(ext: E, cmp: C) -> Extract<E, C>
+    pub fn with_cmp<T: ?Sized, K>(ext: E, cmp: C) -> Self
         where E: Fn(&T) -> K, C: Compare<K> { Extract { ext: ext, cmp: cmp } }
 }
 
@@ -520,17 +520,17 @@ impl<T: Ord + ?Sized> Compare<T> for Natural<T> {
 }
 
 impl<T: Ord + ?Sized> Clone for Natural<T> {
-    fn clone(&self) -> Natural<T> { *self }
+    fn clone(&self) -> Self { *self }
 }
 
 impl<T: Ord + ?Sized> Copy for Natural<T> {}
 
 impl<T: Ord + ?Sized> Default for Natural<T> {
-    fn default() -> Natural<T> { natural() }
+    fn default() -> Self { natural() }
 }
 
 impl<T: Ord + ?Sized> PartialEq for Natural<T> {
-    fn eq(&self, _other: &Natural<T>) -> bool { true }
+    fn eq(&self, _other: &Self) -> bool { true }
 }
 
 impl<T: Ord + ?Sized> Eq for Natural<T> {}
