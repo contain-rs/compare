@@ -297,7 +297,7 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     /// # Examples
     ///
     /// ```
-    /// use compare::Compare;
+    /// use compare::{Compare, Extract};
     /// use std::cmp::Ordering::{Less, Equal};
     ///
     /// struct Foo { key1: char, key2: u8 }
@@ -305,10 +305,10 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     /// let f1 = &Foo { key1: 'a', key2: 2};
     /// let f2 = &Foo { key1: 'a', key2: 3};
     ///
-    /// let cmp = |lhs: &Foo, rhs: &Foo| lhs.key1.cmp(&rhs.key1);
+    /// let cmp = Extract::new(|foo: &Foo| foo.key1);
     /// assert_eq!(cmp.compare(f1, f2), Equal);
     ///
-    /// let cmp = cmp.then(|lhs: &Foo, rhs: &Foo| lhs.key2.cmp(&rhs.key2));
+    /// let cmp = cmp.then(Extract::new(|foo: &Foo| foo.key2));
     /// assert_eq!(cmp.compare(f1, f2), Less);
     /// ```
     fn then<D>(self, then: D) -> Then<Self, D> where D: Compare<Lhs, Rhs>, Self: Sized {
