@@ -195,34 +195,22 @@ pub trait Compare<L: ?Sized, R: ?Sized = L> {
     fn compare(&self, l: &L, r: &R) -> Ordering;
 
     /// Checks if `l` is less than `r`.
-    fn compares_lt(&self, l: &L, r: &R) -> bool {
-        self.compare(l, r) == Less
-    }
+    fn compares_lt(&self, l: &L, r: &R) -> bool { self.compare(l, r) == Less }
 
     /// Checks if `l` is less than or equal to `r`.
-    fn compares_le(&self, l: &L, r: &R) -> bool {
-        self.compare(l, r) != Greater
-    }
+    fn compares_le(&self, l: &L, r: &R) -> bool { self.compare(l, r) != Greater }
 
     /// Checks if `l` is greater than or equal to `r`.
-    fn compares_ge(&self, l: &L, r: &R) -> bool {
-        self.compare(l, r) != Less
-    }
+    fn compares_ge(&self, l: &L, r: &R) -> bool { self.compare(l, r) != Less }
 
     /// Checks if `l` is greater than `r`.
-    fn compares_gt(&self, l: &L, r: &R) -> bool {
-        self.compare(l, r) == Greater
-    }
+    fn compares_gt(&self, l: &L, r: &R) -> bool { self.compare(l, r) == Greater }
 
     /// Checks if `l` is equal to `r`.
-    fn compares_eq(&self, l: &L, r: &R) -> bool {
-        self.compare(l, r) == Equal
-    }
+    fn compares_eq(&self, l: &L, r: &R) -> bool { self.compare(l, r) == Equal }
 
     /// Checks if `l` is not equal to `r`.
-    fn compares_ne(&self, l: &L, r: &R) -> bool {
-        self.compare(l, r) != Equal
-    }
+    fn compares_ne(&self, l: &L, r: &R) -> bool { self.compare(l, r) != Equal }
 
     /// Borrows the comparator's parameters before comparing them.
     ///
@@ -243,9 +231,7 @@ pub trait Compare<L: ?Sized, R: ?Sized = L> {
     /// assert_eq!(cmp.compare(a_str, b_str), Less);
     /// assert_eq!(cmp.compare(&b_string, a_str), Greater);
     /// ```
-    fn borrowing(self) -> Borrowing<Self, L, R> where Self: Sized {
-        Borrowing(self, PhantomData)
-    }
+    fn borrowing(self) -> Borrowing<Self, L, R> where Self: Sized { Borrowing(self, PhantomData) }
 
     /// Reverses the ordering of the comparator.
     ///
@@ -329,38 +315,15 @@ pub struct Borrowing<C, Lb: ?Sized, Rb: ?Sized = Lb>(C, PhantomData<fn(&Lb, &Rb)
     where C: Compare<Lb, Rb>;
 
 impl<C, L: ?Sized, R: ?Sized, Lb: ?Sized, Rb: ?Sized> Compare<L, R> for Borrowing<C, Lb, Rb>
-    where C: Compare<Lb, Rb>,
-          L: Borrow<Lb>,
-          R: Borrow<Rb>,
-{
+    where C: Compare<Lb, Rb>, L: Borrow<Lb>, R: Borrow<Rb> {
 
-    fn compare(&self, l: &L, r: &R) -> Ordering {
-        self.0.compare(l.borrow(), r.borrow())
-    }
-
-    fn compares_lt(&self, l: &L, r: &R) -> bool {
-        self.0.compares_lt(l.borrow(), r.borrow())
-    }
-
-    fn compares_le(&self, l: &L, r: &R) -> bool {
-        self.0.compares_le(l.borrow(), r.borrow())
-    }
-
-    fn compares_ge(&self, l: &L, r: &R) -> bool {
-        self.0.compares_ge(l.borrow(), r.borrow())
-    }
-
-    fn compares_gt(&self, l: &L, r: &R) -> bool {
-        self.0.compares_gt(l.borrow(), r.borrow())
-    }
-
-    fn compares_eq(&self, l: &L, r: &R) -> bool {
-        self.0.compares_eq(l.borrow(), r.borrow())
-    }
-
-    fn compares_ne(&self, l: &L, r: &R) -> bool {
-        self.0.compares_ne(l.borrow(), r.borrow())
-    }
+    fn compare(&self, l: &L, r: &R) -> Ordering { self.0.compare(l.borrow(), r.borrow()) }
+    fn compares_lt(&self, l: &L, r: &R) -> bool { self.0.compares_lt(l.borrow(), r.borrow()) }
+    fn compares_le(&self, l: &L, r: &R) -> bool { self.0.compares_le(l.borrow(), r.borrow()) }
+    fn compares_ge(&self, l: &L, r: &R) -> bool { self.0.compares_ge(l.borrow(), r.borrow()) }
+    fn compares_gt(&self, l: &L, r: &R) -> bool { self.0.compares_gt(l.borrow(), r.borrow()) }
+    fn compares_eq(&self, l: &L, r: &R) -> bool { self.0.compares_eq(l.borrow(), r.borrow()) }
+    fn compares_ne(&self, l: &L, r: &R) -> bool { self.0.compares_ne(l.borrow(), r.borrow()) }
 }
 
 impl<C, Lb: ?Sized, Rb: ?Sized> Clone for Borrowing<C, Lb, Rb>
@@ -389,9 +352,7 @@ impl<C, Lb: ?Sized, Rb: ?Sized> Eq for Borrowing<C, Lb, Rb> where C: Compare<Lb,
 impl<C, Lb: ?Sized, Rb: ?Sized> Debug for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Debug {
 
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Borrowing({:?})", self.0)
-    }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "Borrowing({:?})", self.0) }
 }
 
 /// A comparator that extracts a sort key from a value.
@@ -499,23 +460,15 @@ impl<C, D, L: ?Sized, R: ?Sized> Compare<L, R> for Then<C, D>
 pub struct Natural<T: Ord + ?Sized>(PhantomData<fn(&T)>);
 
 /// Returns a comparator that delegates to `Ord`.
-pub fn natural<T: Ord + ?Sized>() -> Natural<T> {
-    Natural(PhantomData)
-}
+pub fn natural<T: Ord + ?Sized>() -> Natural<T> { Natural(PhantomData) }
 
 impl<T: Ord + ?Sized> Compare<T> for Natural<T> {
     fn compare(&self, l: &T, r: &T) -> Ordering { Ord::cmp(l, r) }
-
     fn compares_lt(&self, l: &T, r: &T) -> bool { PartialOrd::lt(l, r) }
-
     fn compares_le(&self, l: &T, r: &T) -> bool { PartialOrd::le(l, r) }
-
     fn compares_ge(&self, l: &T, r: &T) -> bool { PartialOrd::ge(l, r) }
-
     fn compares_gt(&self, l: &T, r: &T) -> bool { PartialOrd::gt(l, r) }
-
     fn compares_eq(&self, l: &T, r: &T) -> bool { PartialEq::eq(l, r) }
-
     fn compares_ne(&self, l: &T, r: &T) -> bool { PartialEq::ne(l, r) }
 }
 
@@ -546,20 +499,12 @@ impl<T: Ord + ?Sized> Debug for Natural<T> {
 pub struct Rev<C>(C);
 
 impl<C, L: ?Sized, R: ?Sized> Compare<L, R> for Rev<C> where C: Compare<L, R> {
-    fn compare(&self, l: &L, r: &R) -> Ordering {
-        self.0.compare(l, r).reverse()
-    }
-
+    fn compare(&self, l: &L, r: &R) -> Ordering { self.0.compare(l, r).reverse() }
     fn compares_lt(&self, l: &L, r: &R) -> bool { self.0.compares_gt(l, r) }
-
     fn compares_le(&self, l: &L, r: &R) -> bool { self.0.compares_ge(l, r) }
-
     fn compares_ge(&self, l: &L, r: &R) -> bool { self.0.compares_le(l, r) }
-
     fn compares_gt(&self, l: &L, r: &R) -> bool { self.0.compares_lt(l, r) }
-
     fn compares_eq(&self, l: &L, r: &R) -> bool { self.0.compares_eq(l, r) }
-
     fn compares_ne(&self, l: &L, r: &R) -> bool { self.0.compares_ne(l, r) }
 }
 
@@ -576,16 +521,10 @@ impl<C, L: ?Sized, R: ?Sized> Compare<R, L> for Swap<C>
     where C: Compare<L, R> {
 
     fn compare(&self, r: &R, l: &L) -> Ordering { self.0.compare(l, r) }
-
     fn compares_lt(&self, r: &R, l: &L) -> bool { self.0.compares_lt(l, r) }
-
     fn compares_le(&self, r: &R, l: &L) -> bool { self.0.compares_le(l, r) }
-
     fn compares_ge(&self, r: &R, l: &L) -> bool { self.0.compares_ge(l, r) }
-
     fn compares_gt(&self, r: &R, l: &L) -> bool { self.0.compares_gt(l, r) }
-
     fn compares_eq(&self, r: &R, l: &L) -> bool { self.0.compares_eq(l, r) }
-
     fn compares_ne(&self, r: &R, l: &L) -> bool { self.0.compares_ne(l, r) }
 }
