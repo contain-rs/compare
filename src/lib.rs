@@ -363,41 +363,29 @@ impl<C, Lhs: ?Sized, Rhs: ?Sized, Lb: ?Sized, Rb: ?Sized> Compare<Lhs, Rhs> for 
     }
 }
 
-// FIXME: replace with `derive(Clone)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<C, Lb: ?Sized, Rb: ?Sized> Clone for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Clone {
 
     fn clone(&self) -> Borrowing<C, Lb, Rb> { Borrowing(self.0.clone(), PhantomData) }
 }
 
-// FIXME: replace with `derive(Copy)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<C, Lb: ?Sized, Rb: ?Sized> Copy for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Copy {}
 
-// FIXME: replace with `derive(Default)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<C, Lb: ?Sized, Rb: ?Sized> Default for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Default {
 
     fn default() -> Borrowing<C, Lb, Rb> { Borrowing(Default::default(), PhantomData) }
 }
 
-// FIXME: replace with `derive(PartialEq)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<C, Lb: ?Sized, Rb: ?Sized> PartialEq for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + PartialEq {
 
     fn eq(&self, other: &Borrowing<C, Lb, Rb>) -> bool { self.0 == other.0 }
 }
 
-// FIXME: replace with `derive(Eq)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<C, Lb: ?Sized, Rb: ?Sized> Eq for Borrowing<C, Lb, Rb> where C: Compare<Lb, Rb> + Eq {}
 
-// FIXME: replace with `derive(Debug)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<C, Lb: ?Sized, Rb: ?Sized> Debug for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Debug {
 
@@ -531,34 +519,22 @@ impl<T: Ord + ?Sized> Compare<T> for Natural<T> {
     fn compares_ne(&self, lhs: &T, rhs: &T) -> bool { PartialEq::ne(lhs, rhs) }
 }
 
-// FIXME: replace with `derive(Clone)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<T: Ord + ?Sized> Clone for Natural<T> {
     fn clone(&self) -> Natural<T> { *self }
 }
 
-// FIXME: replace with `derive(Copy)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<T: Ord + ?Sized> Copy for Natural<T> {}
 
-// FIXME: replace with `derive(Default)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<T: Ord + ?Sized> Default for Natural<T> {
     fn default() -> Natural<T> { natural() }
 }
 
-// FIXME: replace with `derive(PartialEq)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<T: Ord + ?Sized> PartialEq for Natural<T> {
     fn eq(&self, _other: &Natural<T>) -> bool { true }
 }
 
-// FIXME: replace with `derive(Eq)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<T: Ord + ?Sized> Eq for Natural<T> {}
 
-// FIXME: replace with `derive(Debug)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<T: Ord + ?Sized> Debug for Natural<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "Natural") }
 }
