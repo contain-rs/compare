@@ -109,7 +109,7 @@
 //! previous example:
 //!
 //! ```rust
-//! use compare::{Compare, Extract, natural};
+//! use compare::{Compare, Extract};
 //! use std::cmp::Ordering::{Less, Greater};
 //!
 //! struct Pet { name: &'static str, age: u8 }
@@ -118,8 +118,8 @@
 //! let ruff2 = &Pet { name: "Ruff", age: 2 };
 //! let fido3 = &Pet { name: "Fido", age: 3 };
 //!
-//! let name_age_cmp = Extract::new(|p: &Pet| p.name, natural())
-//!              .then(Extract::new(|p: &Pet| p.age, natural()));
+//! let name_age_cmp = Extract::new(|p: &Pet| p.name)
+//!              .then(Extract::new(|p: &Pet| p.age));
 //!
 //! assert_eq!(name_age_cmp.compare(fido4, ruff2), Less);
 //! assert_eq!(name_age_cmp.compare(fido4, fido3), Greater);
@@ -138,7 +138,7 @@ use std::fmt::{self, Debug};
 /// # Examples
 ///
 /// ```rust
-/// use compare::{Extract, natural, max};
+/// use compare::{Extract, max};
 ///
 /// struct Foo { key: char, id: u8 }
 ///
@@ -146,7 +146,7 @@ use std::fmt::{self, Debug};
 /// let f2 = &Foo { key: 'a', id: 2};
 /// let f3 = &Foo { key: 'b', id: 3};
 ///
-/// let cmp = Extract::new(|f: &Foo| f.key, natural());
+/// let cmp = Extract::new(|f: &Foo| f.key);
 /// assert_eq!(max(&cmp, f1, f2).id, f2.id);
 /// assert_eq!(max(&cmp, f1, f3).id, f3.id);
 /// ```
@@ -164,7 +164,7 @@ pub fn max<'a, C: ?Sized, T: ?Sized>(cmp: &C, lhs: &'a T, rhs: &'a T) -> &'a T
 /// # Examples
 ///
 /// ```rust
-/// use compare::{Extract, natural, min};
+/// use compare::{Extract, min};
 ///
 /// struct Foo { key: char, id: u8 }
 ///
@@ -172,7 +172,7 @@ pub fn max<'a, C: ?Sized, T: ?Sized>(cmp: &C, lhs: &'a T, rhs: &'a T) -> &'a T
 /// let f2 = &Foo { key: 'b', id: 2};
 /// let f3 = &Foo { key: 'a', id: 3};
 ///
-/// let cmp = Extract::new(|f: &Foo| f.key, natural());
+/// let cmp = Extract::new(|f: &Foo| f.key);
 /// assert_eq!(min(&cmp, f1, f2).id, f1.id);
 /// assert_eq!(min(&cmp, f1, f3).id, f3.id);
 /// ```
@@ -411,13 +411,13 @@ impl<C, Lb: ?Sized, Rb: ?Sized> Debug for Borrow<C, Lb, Rb>
 /// # Examples
 ///
 /// ```rust
-/// use compare::{Compare, Extract, natural};
+/// use compare::{Compare, Extract};
 /// use std::cmp::Ordering::Greater;
 ///
 /// let a = vec![1, 2, 3];
 /// let b = vec![4, 5];
 ///
-/// let cmp = Extract::new(|vec: &Vec<u8>| vec.len(), natural());
+/// let cmp = Extract::new(|vec: &Vec<u8>| vec.len());
 /// assert_eq!(cmp.compare(&a, &b), Greater);
 /// ```
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -426,14 +426,21 @@ pub struct Extract<E, C> {
     cmp: C,
 }
 
+impl<E, K> Extract<E, Natural<K>> where K: Ord {
+    /// Returns a comparator that extracts a sort key using `ext` and compares it according to its
+    /// natural ordering.
+    pub fn new<T: ?Sized>(ext: E) -> Extract<E, Natural<K>> where E: Fn(&T) -> K {
+        Extract { ext: ext, cmp: natural() }
+    }
+}
+
 // FIXME: convert to default method on `Compare` once where clauses permit equality
 // (https://github.com/rust-lang/rust/issues/20041)
 impl<E, C> Extract<E, C> {
     /// Returns a comparator that extracts a sort key using `ext` and compares it using
     /// `cmp`.
-    pub fn new<T: ?Sized, K>(ext: E, cmp: C) -> Extract<E, C> where E: Fn(&T) -> K, C: Compare<K> {
-        Extract { ext: ext, cmp: cmp }
-    }
+    pub fn with_cmp<T: ?Sized, K>(ext: E, cmp: C) -> Extract<E, C>
+        where E: Fn(&T) -> K, C: Compare<K> { Extract { ext: ext, cmp: cmp } }
 }
 
 impl<E, C, T: ?Sized, K> Compare<T> for Extract<E, C> where E: Fn(&T) -> K, C: Compare<K> {
