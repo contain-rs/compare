@@ -56,17 +56,17 @@
 //! ```
 //!
 //! It is possible to implement a comparator that is not based on the natural ordering of
-//! a type by using a closure of type `Fn(&Lhs, &Rhs) -> Ordering`. For example, vectors
+//! a type by using a closure of type `Fn(&Lhs, &Rhs) -> Ordering`. For example, slices
 //! can be compared by their length instead of their contents:
 //!
 //! ```
 //! use compare::Compare;
 //! use std::cmp::Ordering::{Less, Greater};
 //!
-//! let a = vec![1, 2, 3];
-//! let b = vec![4, 5];
+//! let a = [1, 2, 3];
+//! let b = [4, 5];
 //!
-//! let cmp = |lhs: &Vec<u8>, rhs: &Vec<u8>| lhs.len().cmp(&rhs.len());
+//! let cmp = |lhs: &[i32], rhs: &[i32]| lhs.len().cmp(&rhs.len());
 //! assert_eq!(cmp.compare(&a, &b), Greater);
 //!
 //! let cmp = cmp.rev();
@@ -414,10 +414,10 @@ impl<C, Lb: ?Sized, Rb: ?Sized> Debug for Borrow<C, Lb, Rb>
 /// use compare::{Compare, Extract};
 /// use std::cmp::Ordering::Greater;
 ///
-/// let a = vec![1, 2, 3];
-/// let b = vec![4, 5];
+/// let a = [1, 2, 3];
+/// let b = [4, 5];
 ///
-/// let cmp = Extract::new(|vec: &Vec<u8>| vec.len());
+/// let cmp = Extract::new(|s: &[i32]| s.len());
 /// assert_eq!(cmp.compare(&a, &b), Greater);
 /// ```
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
