@@ -12,7 +12,7 @@
 //! to the type's implementation of [`Ord`]
 //! (http://doc.rust-lang.org/std/cmp/trait.Ord.html):
 //!
-//! ```rust
+//! ```
 //! use compare::{Compare, natural};
 //! use std::cmp::Ordering::{Less, Equal, Greater};
 //!
@@ -27,7 +27,7 @@
 //!
 //! There are convenience methods for checking each of the six relations:
 //!
-//! ```rust
+//! ```
 //! use compare::{Compare, natural};
 //!
 //! let a = &1;
@@ -47,7 +47,7 @@
 //! [iterator adaptors](http://doc.rust-lang.org/std/iter/trait.IteratorExt.html). For
 //! example, all comparators can be [reversed](trait.Compare.html#method.rev):
 //!
-//! ```rust
+//! ```
 //! use compare::{Compare, natural};
 //! use std::cmp::Ordering::Greater;
 //!
@@ -59,7 +59,7 @@
 //! a type by using a closure of type `Fn(&Lhs, &Rhs) -> Ordering`. For example, vectors
 //! can be compared by their length instead of their contents:
 //!
-//! ```rust
+//! ```
 //! use compare::Compare;
 //! use std::cmp::Ordering::{Less, Greater};
 //!
@@ -78,7 +78,7 @@
 //! first by one key, [then](trait.Compare.html#method.then), if the first keys were
 //! equal, by another:
 //!
-//! ```rust
+//! ```
 //! use compare::Compare;
 //! use std::cmp::Ordering::{Less, Equal, Greater};
 //!
@@ -108,7 +108,7 @@
 //! [key-extraction logic](struct.Extract.html) can be factored out, simplifying the
 //! previous example:
 //!
-//! ```rust
+//! ```
 //! use compare::{Compare, Extract};
 //! use std::cmp::Ordering::{Less, Greater};
 //!
@@ -137,7 +137,7 @@ use std::fmt::{self, Debug};
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```
 /// use compare::{Extract, max};
 ///
 /// struct Foo { key: char, id: u8 }
@@ -163,7 +163,7 @@ pub fn max<'a, C: ?Sized, T: ?Sized>(cmp: &C, lhs: &'a T, rhs: &'a T) -> &'a T
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```
 /// use compare::{Extract, min};
 ///
 /// struct Foo { key: char, id: u8 }
@@ -228,7 +228,7 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```
     /// use compare::{Compare, natural};
     /// use std::cmp::Ordering::{Less, Equal, Greater};
     ///
@@ -251,7 +251,7 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```
     /// use compare::{Compare, natural};
     /// use std::cmp::Ordering::{Less, Equal, Greater};
     ///
@@ -272,7 +272,7 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```
     /// use compare::Compare;
     /// use std::cmp::Ordering::{Less, Equal, Greater};
     ///
@@ -296,7 +296,7 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```
     /// use compare::Compare;
     /// use std::cmp::Ordering::{Less, Equal};
     ///
@@ -410,7 +410,7 @@ impl<C, Lb: ?Sized, Rb: ?Sized> Debug for Borrow<C, Lb, Rb>
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```
 /// use compare::{Compare, Extract};
 /// use std::cmp::Ordering::Greater;
 ///
@@ -496,7 +496,7 @@ impl<C, D, Lhs: ?Sized, Rhs: ?Sized> Compare<Lhs, Rhs> for Then<C, D>
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```
 /// use compare::{Compare, natural};
 /// use std::cmp::Ordering::{Less, Equal, Greater};
 ///
