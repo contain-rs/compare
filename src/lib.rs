@@ -126,7 +126,7 @@
 //! assert_eq!(name_age_cmp.compare(ruff2, fido3), Greater);
 //! ```
 
-use std::borrow::Borrow as StdBorrow;
+use std::borrow::Borrow;
 use std::cmp::Ordering::{self, Less, Equal, Greater};
 use std::default::Default;
 use std::marker::PhantomData;
@@ -238,13 +238,13 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     /// let b_str = "b";
     /// let b_string = b_str.to_string();
     ///
-    /// let cmp = natural().borrow();
+    /// let cmp = natural().borrowing();
     /// assert_eq!(cmp.compare(a_str, &a_string), Equal);
     /// assert_eq!(cmp.compare(a_str, b_str), Less);
     /// assert_eq!(cmp.compare(&b_string, a_str), Greater);
     /// ```
-    fn borrow(self) -> Borrow<Self, Lhs, Rhs> where Self: Sized {
-        Borrow(self, PhantomData)
+    fn borrowing(self) -> Borrowing<Self, Lhs, Rhs> where Self: Sized {
+        Borrowing(self, PhantomData)
     }
 
     /// Reverses the ordering of the comparator.
@@ -325,13 +325,13 @@ impl<F: ?Sized, Lhs: ?Sized, Rhs: ?Sized> Compare<Lhs, Rhs> for F
 /// A comparator that borrows its parameters before comparing them.
 ///
 /// See [`Compare::borrow`](trait.Compare.html#method.borrow) for an example.
-pub struct Borrow<C, Lb: ?Sized, Rb: ?Sized = Lb>(C, PhantomData<fn(&Lb, &Rb)>)
+pub struct Borrowing<C, Lb: ?Sized, Rb: ?Sized = Lb>(C, PhantomData<fn(&Lb, &Rb)>)
     where C: Compare<Lb, Rb>;
 
-impl<C, Lhs: ?Sized, Rhs: ?Sized, Lb: ?Sized, Rb: ?Sized> Compare<Lhs, Rhs> for Borrow<C, Lb, Rb>
+impl<C, Lhs: ?Sized, Rhs: ?Sized, Lb: ?Sized, Rb: ?Sized> Compare<Lhs, Rhs> for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb>,
-          Lhs: StdBorrow<Lb>,
-          Rhs: StdBorrow<Rb>,
+          Lhs: Borrow<Lb>,
+          Rhs: Borrow<Rb>,
 {
 
     fn compare(&self, lhs: &Lhs, rhs: &Rhs) -> Ordering {
@@ -365,44 +365,44 @@ impl<C, Lhs: ?Sized, Rhs: ?Sized, Lb: ?Sized, Rb: ?Sized> Compare<Lhs, Rhs> for 
 
 // FIXME: replace with `derive(Clone)` once
 // https://github.com/rust-lang/rust/issues/19839 is fixed
-impl<C, Lb: ?Sized, Rb: ?Sized> Clone for Borrow<C, Lb, Rb>
+impl<C, Lb: ?Sized, Rb: ?Sized> Clone for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Clone {
 
-    fn clone(&self) -> Borrow<C, Lb, Rb> { Borrow(self.0.clone(), PhantomData) }
+    fn clone(&self) -> Borrowing<C, Lb, Rb> { Borrowing(self.0.clone(), PhantomData) }
 }
 
 // FIXME: replace with `derive(Copy)` once
 // https://github.com/rust-lang/rust/issues/19839 is fixed
-impl<C, Lb: ?Sized, Rb: ?Sized> Copy for Borrow<C, Lb, Rb>
+impl<C, Lb: ?Sized, Rb: ?Sized> Copy for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Copy {}
 
 // FIXME: replace with `derive(Default)` once
 // https://github.com/rust-lang/rust/issues/19839 is fixed
-impl<C, Lb: ?Sized, Rb: ?Sized> Default for Borrow<C, Lb, Rb>
+impl<C, Lb: ?Sized, Rb: ?Sized> Default for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Default {
 
-    fn default() -> Borrow<C, Lb, Rb> { Borrow(Default::default(), PhantomData) }
+    fn default() -> Borrowing<C, Lb, Rb> { Borrowing(Default::default(), PhantomData) }
 }
 
 // FIXME: replace with `derive(PartialEq)` once
 // https://github.com/rust-lang/rust/issues/19839 is fixed
-impl<C, Lb: ?Sized, Rb: ?Sized> PartialEq for Borrow<C, Lb, Rb>
+impl<C, Lb: ?Sized, Rb: ?Sized> PartialEq for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + PartialEq {
 
-    fn eq(&self, other: &Borrow<C, Lb, Rb>) -> bool { self.0 == other.0 }
+    fn eq(&self, other: &Borrowing<C, Lb, Rb>) -> bool { self.0 == other.0 }
 }
 
 // FIXME: replace with `derive(Eq)` once
 // https://github.com/rust-lang/rust/issues/19839 is fixed
-impl<C, Lb: ?Sized, Rb: ?Sized> Eq for Borrow<C, Lb, Rb> where C: Compare<Lb, Rb> + Eq {}
+impl<C, Lb: ?Sized, Rb: ?Sized> Eq for Borrowing<C, Lb, Rb> where C: Compare<Lb, Rb> + Eq {}
 
 // FIXME: replace with `derive(Debug)` once
 // https://github.com/rust-lang/rust/issues/19839 is fixed
-impl<C, Lb: ?Sized, Rb: ?Sized> Debug for Borrow<C, Lb, Rb>
+impl<C, Lb: ?Sized, Rb: ?Sized> Debug for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Debug {
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Borrow({:?})", self.0)
+        write!(f, "Borrowing({:?})", self.0)
     }
 }
 
