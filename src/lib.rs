@@ -12,7 +12,7 @@
 //! to the type's implementation of [`Ord`]
 //! (http://doc.rust-lang.org/std/cmp/trait.Ord.html):
 //!
-//! ```rust
+//! ```
 //! use compare::{Compare, natural};
 //! use std::cmp::Ordering::{Less, Equal, Greater};
 //!
@@ -27,7 +27,7 @@
 //!
 //! There are convenience methods for checking each of the six relations:
 //!
-//! ```rust
+//! ```
 //! use compare::{Compare, natural};
 //!
 //! let a = &1;
@@ -47,7 +47,7 @@
 //! [iterator adaptors](http://doc.rust-lang.org/std/iter/trait.IteratorExt.html). For
 //! example, all comparators can be [reversed](trait.Compare.html#method.rev):
 //!
-//! ```rust
+//! ```
 //! use compare::{Compare, natural};
 //! use std::cmp::Ordering::Greater;
 //!
@@ -56,17 +56,17 @@
 //! ```
 //!
 //! It is possible to implement a comparator that is not based on the natural ordering of
-//! a type by using a closure of type `Fn(&Lhs, &Rhs) -> Ordering`. For example, vectors
+//! a type by using a closure of type `Fn(&L, &R) -> Ordering`. For example, slices
 //! can be compared by their length instead of their contents:
 //!
-//! ```rust
+//! ```
 //! use compare::Compare;
 //! use std::cmp::Ordering::{Less, Greater};
 //!
-//! let a = vec![1, 2, 3];
-//! let b = vec![4, 5];
+//! let a = [1, 2, 3];
+//! let b = [4, 5];
 //!
-//! let cmp = |lhs: &Vec<u8>, rhs: &Vec<u8>| lhs.len().cmp(&rhs.len());
+//! let cmp = |l: &[i32], r: &[i32]| l.len().cmp(&r.len());
 //! assert_eq!(cmp.compare(&a, &b), Greater);
 //!
 //! let cmp = cmp.rev();
@@ -78,7 +78,7 @@
 //! first by one key, [then](trait.Compare.html#method.then), if the first keys were
 //! equal, by another:
 //!
-//! ```rust
+//! ```
 //! use compare::Compare;
 //! use std::cmp::Ordering::{Less, Equal, Greater};
 //!
@@ -88,12 +88,12 @@
 //! let ruff2 = &Pet { name: "Ruff", age: 2 };
 //! let fido3 = &Pet { name: "Fido", age: 3 };
 //!
-//! let name_cmp = |lhs: &Pet, rhs: &Pet| lhs.name.cmp(rhs.name);
+//! let name_cmp = |l: &Pet, r: &Pet| l.name.cmp(r.name);
 //! assert_eq!(name_cmp.compare(fido4, ruff2), Less);
 //! assert_eq!(name_cmp.compare(fido4, fido3), Equal);
 //! assert_eq!(name_cmp.compare(ruff2, fido3), Greater);
 //!
-//! let age_cmp = |lhs: &Pet, rhs: &Pet| lhs.age.cmp(&rhs.age);
+//! let age_cmp = |l: &Pet, r: &Pet| l.age.cmp(&r.age);
 //! assert_eq!(age_cmp.compare(fido4, ruff2), Greater);
 //! assert_eq!(age_cmp.compare(fido4, fido3), Greater);
 //! assert_eq!(age_cmp.compare(ruff2, fido3), Less);
@@ -108,8 +108,8 @@
 //! [key-extraction logic](struct.Extract.html) can be factored out, simplifying the
 //! previous example:
 //!
-//! ```rust
-//! use compare::{Compare, Extract, natural};
+//! ```
+//! use compare::{Compare, Extract};
 //! use std::cmp::Ordering::{Less, Greater};
 //!
 //! struct Pet { name: &'static str, age: u8 }
@@ -118,27 +118,27 @@
 //! let ruff2 = &Pet { name: "Ruff", age: 2 };
 //! let fido3 = &Pet { name: "Fido", age: 3 };
 //!
-//! let name_age_cmp = Extract::new(|p: &Pet| p.name, natural())
-//!              .then(Extract::new(|p: &Pet| p.age, natural()));
+//! let name_age_cmp = Extract::new(|p: &Pet| p.name)
+//!              .then(Extract::new(|p: &Pet| p.age));
 //!
 //! assert_eq!(name_age_cmp.compare(fido4, ruff2), Less);
 //! assert_eq!(name_age_cmp.compare(fido4, fido3), Greater);
 //! assert_eq!(name_age_cmp.compare(ruff2, fido3), Greater);
 //! ```
 
-use std::borrow::Borrow as StdBorrow;
+use std::borrow::Borrow;
 use std::cmp::Ordering::{self, Less, Equal, Greater};
 use std::default::Default;
 use std::marker::PhantomData;
 use std::fmt::{self, Debug};
 
-/// Returns the maximum of two values according to the given comparator, or `rhs` if they
+/// Returns the maximum of two values according to the given comparator, or `r` if they
 /// are equal.
 ///
 /// # Examples
 ///
-/// ```rust
-/// use compare::{Extract, natural, max};
+/// ```
+/// use compare::{Extract, max};
 ///
 /// struct Foo { key: char, id: u8 }
 ///
@@ -146,25 +146,25 @@ use std::fmt::{self, Debug};
 /// let f2 = &Foo { key: 'a', id: 2};
 /// let f3 = &Foo { key: 'b', id: 3};
 ///
-/// let cmp = Extract::new(|f: &Foo| f.key, natural());
+/// let cmp = Extract::new(|f: &Foo| f.key);
 /// assert_eq!(max(&cmp, f1, f2).id, f2.id);
 /// assert_eq!(max(&cmp, f1, f3).id, f3.id);
 /// ```
 // FIXME: convert to default method on `Compare` once where clauses permit equality
 // (https://github.com/rust-lang/rust/issues/20041)
-pub fn max<'a, C: ?Sized, T: ?Sized>(cmp: &C, lhs: &'a T, rhs: &'a T) -> &'a T
+pub fn max<'a, C: ?Sized, T: ?Sized>(cmp: &C, l: &'a T, r: &'a T) -> &'a T
     where C: Compare<T> {
 
-    if cmp.compares_ge(rhs, lhs) { rhs } else { lhs }
+    if cmp.compares_ge(r, l) { r } else { l }
 }
 
-/// Returns the minimum of two values according to the given comparator, or `lhs` if they
+/// Returns the minimum of two values according to the given comparator, or `l` if they
 /// are equal.
 ///
 /// # Examples
 ///
-/// ```rust
-/// use compare::{Extract, natural, min};
+/// ```
+/// use compare::{Extract, min};
 ///
 /// struct Foo { key: char, id: u8 }
 ///
@@ -172,16 +172,16 @@ pub fn max<'a, C: ?Sized, T: ?Sized>(cmp: &C, lhs: &'a T, rhs: &'a T) -> &'a T
 /// let f2 = &Foo { key: 'b', id: 2};
 /// let f3 = &Foo { key: 'a', id: 3};
 ///
-/// let cmp = Extract::new(|f: &Foo| f.key, natural());
+/// let cmp = Extract::new(|f: &Foo| f.key);
 /// assert_eq!(min(&cmp, f1, f2).id, f1.id);
 /// assert_eq!(min(&cmp, f1, f3).id, f3.id);
 /// ```
 // FIXME: convert to default method on `Compare` once where clauses permit equality
 // (https://github.com/rust-lang/rust/issues/20041)
-pub fn min<'a, C: ?Sized, T: ?Sized>(cmp: &C, lhs: &'a T, rhs: &'a T) -> &'a T
+pub fn min<'a, C: ?Sized, T: ?Sized>(cmp: &C, l: &'a T, r: &'a T) -> &'a T
     where C: Compare<T> {
 
-    if cmp.compares_le(lhs, rhs) { lhs } else { rhs }
+    if cmp.compares_le(l, r) { l } else { r }
 }
 
 /// A comparator imposing a [total order](https://en.wikipedia.org/wiki/Total_order).
@@ -189,46 +189,34 @@ pub fn min<'a, C: ?Sized, T: ?Sized>(cmp: &C, lhs: &'a T, rhs: &'a T) -> &'a T
 /// See the [`compare` module's documentation](index.html) for detailed usage.
 ///
 /// The `compares_*` methods may be overridden to provide more efficient implementations.
-pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
-    /// Compares two values, returning `Less`, `Equal`, or `Greater` if `lhs` is less
-    /// than, equal to, or greater than `rhs`, respectively.
-    fn compare(&self, lhs: &Lhs, rhs: &Rhs) -> Ordering;
+pub trait Compare<L: ?Sized, R: ?Sized = L> {
+    /// Compares two values, returning `Less`, `Equal`, or `Greater` if `l` is less
+    /// than, equal to, or greater than `r`, respectively.
+    fn compare(&self, l: &L, r: &R) -> Ordering;
 
-    /// Checks if `lhs` is less than `rhs`.
-    fn compares_lt(&self, lhs: &Lhs, rhs: &Rhs) -> bool {
-        self.compare(lhs, rhs) == Less
-    }
+    /// Checks if `l` is less than `r`.
+    fn compares_lt(&self, l: &L, r: &R) -> bool { self.compare(l, r) == Less }
 
-    /// Checks if `lhs` is less than or equal to `rhs`.
-    fn compares_le(&self, lhs: &Lhs, rhs: &Rhs) -> bool {
-        self.compare(lhs, rhs) != Greater
-    }
+    /// Checks if `l` is less than or equal to `r`.
+    fn compares_le(&self, l: &L, r: &R) -> bool { self.compare(l, r) != Greater }
 
-    /// Checks if `lhs` is greater than or equal to `rhs`.
-    fn compares_ge(&self, lhs: &Lhs, rhs: &Rhs) -> bool {
-        self.compare(lhs, rhs) != Less
-    }
+    /// Checks if `l` is greater than or equal to `r`.
+    fn compares_ge(&self, l: &L, r: &R) -> bool { self.compare(l, r) != Less }
 
-    /// Checks if `lhs` is greater than `rhs`.
-    fn compares_gt(&self, lhs: &Lhs, rhs: &Rhs) -> bool {
-        self.compare(lhs, rhs) == Greater
-    }
+    /// Checks if `l` is greater than `r`.
+    fn compares_gt(&self, l: &L, r: &R) -> bool { self.compare(l, r) == Greater }
 
-    /// Checks if `lhs` is equal to `rhs`.
-    fn compares_eq(&self, lhs: &Lhs, rhs: &Rhs) -> bool {
-        self.compare(lhs, rhs) == Equal
-    }
+    /// Checks if `l` is equal to `r`.
+    fn compares_eq(&self, l: &L, r: &R) -> bool { self.compare(l, r) == Equal }
 
-    /// Checks if `lhs` is not equal to `rhs`.
-    fn compares_ne(&self, lhs: &Lhs, rhs: &Rhs) -> bool {
-        self.compare(lhs, rhs) != Equal
-    }
+    /// Checks if `l` is not equal to `r`.
+    fn compares_ne(&self, l: &L, r: &R) -> bool { self.compare(l, r) != Equal }
 
     /// Borrows the comparator's parameters before comparing them.
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```
     /// use compare::{Compare, natural};
     /// use std::cmp::Ordering::{Less, Equal, Greater};
     ///
@@ -238,20 +226,18 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     /// let b_str = "b";
     /// let b_string = b_str.to_string();
     ///
-    /// let cmp = natural().borrow();
+    /// let cmp = natural().borrowing();
     /// assert_eq!(cmp.compare(a_str, &a_string), Equal);
     /// assert_eq!(cmp.compare(a_str, b_str), Less);
     /// assert_eq!(cmp.compare(&b_string, a_str), Greater);
     /// ```
-    fn borrow(self) -> Borrow<Self, Lhs, Rhs> where Self: Sized {
-        Borrow(self, PhantomData)
-    }
+    fn borrowing(self) -> Borrowing<Self, L, R> where Self: Sized { Borrowing(self, PhantomData) }
 
     /// Reverses the ordering of the comparator.
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```
     /// use compare::{Compare, natural};
     /// use std::cmp::Ordering::{Less, Equal, Greater};
     ///
@@ -272,11 +258,11 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```
     /// use compare::Compare;
     /// use std::cmp::Ordering::{Less, Equal, Greater};
     ///
-    /// let cmp = |lhs: &u8, rhs: &u16| (*lhs as u16).cmp(rhs);
+    /// let cmp = |l: &u8, r: &u16| (*l as u16).cmp(r);
     /// assert_eq!(cmp.compare(&1u8, &2u16), Less);
     /// assert_eq!(cmp.compare(&2u8, &1u16), Greater);
     /// assert_eq!(cmp.compare(&1u8, &1u16), Equal);
@@ -296,8 +282,8 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     ///
     /// # Examples
     ///
-    /// ```rust
-    /// use compare::Compare;
+    /// ```
+    /// use compare::{Compare, Extract};
     /// use std::cmp::Ordering::{Less, Equal};
     ///
     /// struct Foo { key1: char, key2: u8 }
@@ -305,119 +291,82 @@ pub trait Compare<Lhs: ?Sized, Rhs: ?Sized = Lhs> {
     /// let f1 = &Foo { key1: 'a', key2: 2};
     /// let f2 = &Foo { key1: 'a', key2: 3};
     ///
-    /// let cmp = |lhs: &Foo, rhs: &Foo| lhs.key1.cmp(&rhs.key1);
+    /// let cmp = Extract::new(|foo: &Foo| foo.key1);
     /// assert_eq!(cmp.compare(f1, f2), Equal);
     ///
-    /// let cmp = cmp.then(|lhs: &Foo, rhs: &Foo| lhs.key2.cmp(&rhs.key2));
+    /// let cmp = cmp.then(Extract::new(|foo: &Foo| foo.key2));
     /// assert_eq!(cmp.compare(f1, f2), Less);
     /// ```
-    fn then<D>(self, then: D) -> Then<Self, D> where D: Compare<Lhs, Rhs>, Self: Sized {
+    fn then<D>(self, then: D) -> Then<Self, D> where D: Compare<L, R>, Self: Sized {
         Then(self, then)
     }
 }
 
-impl<F: ?Sized, Lhs: ?Sized, Rhs: ?Sized> Compare<Lhs, Rhs> for F
-    where F: Fn(&Lhs, &Rhs) -> Ordering {
+impl<F: ?Sized, L: ?Sized, R: ?Sized> Compare<L, R> for F
+    where F: Fn(&L, &R) -> Ordering {
 
-    fn compare(&self, lhs: &Lhs, rhs: &Rhs) -> Ordering { (*self)(lhs, rhs) }
+    fn compare(&self, l: &L, r: &R) -> Ordering { (*self)(l, r) }
 }
 
 /// A comparator that borrows its parameters before comparing them.
 ///
 /// See [`Compare::borrow`](trait.Compare.html#method.borrow) for an example.
-pub struct Borrow<C, Lb: ?Sized, Rb: ?Sized = Lb>(C, PhantomData<fn(&Lb, &Rb)>)
+pub struct Borrowing<C, Lb: ?Sized, Rb: ?Sized = Lb>(C, PhantomData<fn(&Lb, &Rb)>)
     where C: Compare<Lb, Rb>;
 
-impl<C, Lhs: ?Sized, Rhs: ?Sized, Lb: ?Sized, Rb: ?Sized> Compare<Lhs, Rhs> for Borrow<C, Lb, Rb>
-    where C: Compare<Lb, Rb>,
-          Lhs: StdBorrow<Lb>,
-          Rhs: StdBorrow<Rb>,
-{
+impl<C, L: ?Sized, R: ?Sized, Lb: ?Sized, Rb: ?Sized> Compare<L, R> for Borrowing<C, Lb, Rb>
+    where C: Compare<Lb, Rb>, L: Borrow<Lb>, R: Borrow<Rb> {
 
-    fn compare(&self, lhs: &Lhs, rhs: &Rhs) -> Ordering {
-        self.0.compare(lhs.borrow(), rhs.borrow())
-    }
-
-    fn compares_lt(&self, lhs: &Lhs, rhs: &Rhs) -> bool {
-        self.0.compares_lt(lhs.borrow(), rhs.borrow())
-    }
-
-    fn compares_le(&self, lhs: &Lhs, rhs: &Rhs) -> bool {
-        self.0.compares_le(lhs.borrow(), rhs.borrow())
-    }
-
-    fn compares_ge(&self, lhs: &Lhs, rhs: &Rhs) -> bool {
-        self.0.compares_ge(lhs.borrow(), rhs.borrow())
-    }
-
-    fn compares_gt(&self, lhs: &Lhs, rhs: &Rhs) -> bool {
-        self.0.compares_gt(lhs.borrow(), rhs.borrow())
-    }
-
-    fn compares_eq(&self, lhs: &Lhs, rhs: &Rhs) -> bool {
-        self.0.compares_eq(lhs.borrow(), rhs.borrow())
-    }
-
-    fn compares_ne(&self, lhs: &Lhs, rhs: &Rhs) -> bool {
-        self.0.compares_ne(lhs.borrow(), rhs.borrow())
-    }
+    fn compare(&self, l: &L, r: &R) -> Ordering { self.0.compare(l.borrow(), r.borrow()) }
+    fn compares_lt(&self, l: &L, r: &R) -> bool { self.0.compares_lt(l.borrow(), r.borrow()) }
+    fn compares_le(&self, l: &L, r: &R) -> bool { self.0.compares_le(l.borrow(), r.borrow()) }
+    fn compares_ge(&self, l: &L, r: &R) -> bool { self.0.compares_ge(l.borrow(), r.borrow()) }
+    fn compares_gt(&self, l: &L, r: &R) -> bool { self.0.compares_gt(l.borrow(), r.borrow()) }
+    fn compares_eq(&self, l: &L, r: &R) -> bool { self.0.compares_eq(l.borrow(), r.borrow()) }
+    fn compares_ne(&self, l: &L, r: &R) -> bool { self.0.compares_ne(l.borrow(), r.borrow()) }
 }
 
-// FIXME: replace with `derive(Clone)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
-impl<C, Lb: ?Sized, Rb: ?Sized> Clone for Borrow<C, Lb, Rb>
+impl<C, Lb: ?Sized, Rb: ?Sized> Clone for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Clone {
 
-    fn clone(&self) -> Borrow<C, Lb, Rb> { Borrow(self.0.clone(), PhantomData) }
+    fn clone(&self) -> Self { Borrowing(self.0.clone(), PhantomData) }
 }
 
-// FIXME: replace with `derive(Copy)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
-impl<C, Lb: ?Sized, Rb: ?Sized> Copy for Borrow<C, Lb, Rb>
+impl<C, Lb: ?Sized, Rb: ?Sized> Copy for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Copy {}
 
-// FIXME: replace with `derive(Default)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
-impl<C, Lb: ?Sized, Rb: ?Sized> Default for Borrow<C, Lb, Rb>
+impl<C, Lb: ?Sized, Rb: ?Sized> Default for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Default {
 
-    fn default() -> Borrow<C, Lb, Rb> { Borrow(Default::default(), PhantomData) }
+    fn default() -> Self { Borrowing(Default::default(), PhantomData) }
 }
 
-// FIXME: replace with `derive(PartialEq)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
-impl<C, Lb: ?Sized, Rb: ?Sized> PartialEq for Borrow<C, Lb, Rb>
+impl<C, Lb: ?Sized, Rb: ?Sized> PartialEq for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + PartialEq {
 
-    fn eq(&self, other: &Borrow<C, Lb, Rb>) -> bool { self.0 == other.0 }
+    fn eq(&self, other: &Self) -> bool { self.0 == other.0 }
 }
 
-// FIXME: replace with `derive(Eq)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
-impl<C, Lb: ?Sized, Rb: ?Sized> Eq for Borrow<C, Lb, Rb> where C: Compare<Lb, Rb> + Eq {}
+impl<C, Lb: ?Sized, Rb: ?Sized> Eq for Borrowing<C, Lb, Rb> where C: Compare<Lb, Rb> + Eq {}
 
-// FIXME: replace with `derive(Debug)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
-impl<C, Lb: ?Sized, Rb: ?Sized> Debug for Borrow<C, Lb, Rb>
+impl<C, Lb: ?Sized, Rb: ?Sized> Debug for Borrowing<C, Lb, Rb>
     where C: Compare<Lb, Rb> + Debug {
 
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Borrow({:?})", self.0)
-    }
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "Borrowing({:?})", self.0) }
 }
 
 /// A comparator that extracts a sort key from a value.
 ///
 /// # Examples
 ///
-/// ```rust
-/// use compare::{Compare, Extract, natural};
+/// ```
+/// use compare::{Compare, Extract};
 /// use std::cmp::Ordering::Greater;
 ///
-/// let a = vec![1, 2, 3];
-/// let b = vec![4, 5];
+/// let a = [1, 2, 3];
+/// let b = [4, 5];
 ///
-/// let cmp = Extract::new(|vec: &Vec<u8>| vec.len(), natural());
+/// let cmp = Extract::new(|s: &[i32]| s.len());
 /// assert_eq!(cmp.compare(&a, &b), Greater);
 /// ```
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -426,43 +375,50 @@ pub struct Extract<E, C> {
     cmp: C,
 }
 
+impl<E, K> Extract<E, Natural<K>> where K: Ord {
+    /// Returns a comparator that extracts a sort key using `ext` and compares it according to its
+    /// natural ordering.
+    pub fn new<T: ?Sized>(ext: E) -> Self where E: Fn(&T) -> K {
+        Extract { ext: ext, cmp: natural() }
+    }
+}
+
 // FIXME: convert to default method on `Compare` once where clauses permit equality
 // (https://github.com/rust-lang/rust/issues/20041)
 impl<E, C> Extract<E, C> {
     /// Returns a comparator that extracts a sort key using `ext` and compares it using
     /// `cmp`.
-    pub fn new<T: ?Sized, K>(ext: E, cmp: C) -> Extract<E, C> where E: Fn(&T) -> K, C: Compare<K> {
-        Extract { ext: ext, cmp: cmp }
-    }
+    pub fn with_cmp<T: ?Sized, K>(ext: E, cmp: C) -> Self
+        where E: Fn(&T) -> K, C: Compare<K> { Extract { ext: ext, cmp: cmp } }
 }
 
 impl<E, C, T: ?Sized, K> Compare<T> for Extract<E, C> where E: Fn(&T) -> K, C: Compare<K> {
-    fn compare(&self, lhs: &T, rhs: &T) -> Ordering {
-        self.cmp.compare(&(self.ext)(lhs), &(self.ext)(rhs))
+    fn compare(&self, l: &T, r: &T) -> Ordering {
+        self.cmp.compare(&(self.ext)(l), &(self.ext)(r))
     }
 
-    fn compares_lt(&self, lhs: &T, rhs: &T) -> bool {
-        self.cmp.compares_lt(&(self.ext)(lhs), &(self.ext)(rhs))
+    fn compares_lt(&self, l: &T, r: &T) -> bool {
+        self.cmp.compares_lt(&(self.ext)(l), &(self.ext)(r))
     }
 
-    fn compares_le(&self, lhs: &T, rhs: &T) -> bool {
-        self.cmp.compares_le(&(self.ext)(lhs), &(self.ext)(rhs))
+    fn compares_le(&self, l: &T, r: &T) -> bool {
+        self.cmp.compares_le(&(self.ext)(l), &(self.ext)(r))
     }
 
-    fn compares_ge(&self, lhs: &T, rhs: &T) -> bool {
-        self.cmp.compares_ge(&(self.ext)(lhs), &(self.ext)(rhs))
+    fn compares_ge(&self, l: &T, r: &T) -> bool {
+        self.cmp.compares_ge(&(self.ext)(l), &(self.ext)(r))
     }
 
-    fn compares_gt(&self, lhs: &T, rhs: &T) -> bool {
-        self.cmp.compares_gt(&(self.ext)(lhs), &(self.ext)(rhs))
+    fn compares_gt(&self, l: &T, r: &T) -> bool {
+        self.cmp.compares_gt(&(self.ext)(l), &(self.ext)(r))
     }
 
-    fn compares_eq(&self, lhs: &T, rhs: &T) -> bool {
-        self.cmp.compares_eq(&(self.ext)(lhs), &(self.ext)(rhs))
+    fn compares_eq(&self, l: &T, r: &T) -> bool {
+        self.cmp.compares_eq(&(self.ext)(l), &(self.ext)(r))
     }
 
-    fn compares_ne(&self, lhs: &T, rhs: &T) -> bool {
-        self.cmp.compares_ne(&(self.ext)(lhs), &(self.ext)(rhs))
+    fn compares_ne(&self, l: &T, r: &T) -> bool {
+        self.cmp.compares_ne(&(self.ext)(l), &(self.ext)(r))
     }
 }
 
@@ -473,12 +429,12 @@ impl<E, C, T: ?Sized, K> Compare<T> for Extract<E, C> where E: Fn(&T) -> K, C: C
 #[derive(Clone, Copy, Default, PartialEq, Eq, Debug)]
 pub struct Then<C, D>(C, D);
 
-impl<C, D, Lhs: ?Sized, Rhs: ?Sized> Compare<Lhs, Rhs> for Then<C, D>
-    where C: Compare<Lhs, Rhs>, D: Compare<Lhs, Rhs> {
+impl<C, D, L: ?Sized, R: ?Sized> Compare<L, R> for Then<C, D>
+    where C: Compare<L, R>, D: Compare<L, R> {
 
-    fn compare(&self, lhs: &Lhs, rhs: &Rhs) -> Ordering {
-        match self.0.compare(lhs, rhs) {
-            Equal => self.1.compare(lhs, rhs),
+    fn compare(&self, l: &L, r: &R) -> Ordering {
+        match self.0.compare(l, r) {
+            Equal => self.1.compare(l, r),
             order => order,
         }
     }
@@ -489,7 +445,7 @@ impl<C, D, Lhs: ?Sized, Rhs: ?Sized> Compare<Lhs, Rhs> for Then<C, D>
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```
 /// use compare::{Compare, natural};
 /// use std::cmp::Ordering::{Less, Equal, Greater};
 ///
@@ -504,54 +460,34 @@ impl<C, D, Lhs: ?Sized, Rhs: ?Sized> Compare<Lhs, Rhs> for Then<C, D>
 pub struct Natural<T: Ord + ?Sized>(PhantomData<fn(&T)>);
 
 /// Returns a comparator that delegates to `Ord`.
-pub fn natural<T: Ord + ?Sized>() -> Natural<T> {
-    Natural(PhantomData)
-}
+pub fn natural<T: Ord + ?Sized>() -> Natural<T> { Natural(PhantomData) }
 
 impl<T: Ord + ?Sized> Compare<T> for Natural<T> {
-    fn compare(&self, lhs: &T, rhs: &T) -> Ordering { Ord::cmp(lhs, rhs) }
-
-    fn compares_lt(&self, lhs: &T, rhs: &T) -> bool { PartialOrd::lt(lhs, rhs) }
-
-    fn compares_le(&self, lhs: &T, rhs: &T) -> bool { PartialOrd::le(lhs, rhs) }
-
-    fn compares_ge(&self, lhs: &T, rhs: &T) -> bool { PartialOrd::ge(lhs, rhs) }
-
-    fn compares_gt(&self, lhs: &T, rhs: &T) -> bool { PartialOrd::gt(lhs, rhs) }
-
-    fn compares_eq(&self, lhs: &T, rhs: &T) -> bool { PartialEq::eq(lhs, rhs) }
-
-    fn compares_ne(&self, lhs: &T, rhs: &T) -> bool { PartialEq::ne(lhs, rhs) }
+    fn compare(&self, l: &T, r: &T) -> Ordering { Ord::cmp(l, r) }
+    fn compares_lt(&self, l: &T, r: &T) -> bool { PartialOrd::lt(l, r) }
+    fn compares_le(&self, l: &T, r: &T) -> bool { PartialOrd::le(l, r) }
+    fn compares_ge(&self, l: &T, r: &T) -> bool { PartialOrd::ge(l, r) }
+    fn compares_gt(&self, l: &T, r: &T) -> bool { PartialOrd::gt(l, r) }
+    fn compares_eq(&self, l: &T, r: &T) -> bool { PartialEq::eq(l, r) }
+    fn compares_ne(&self, l: &T, r: &T) -> bool { PartialEq::ne(l, r) }
 }
 
-// FIXME: replace with `derive(Clone)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<T: Ord + ?Sized> Clone for Natural<T> {
-    fn clone(&self) -> Natural<T> { *self }
+    fn clone(&self) -> Self { *self }
 }
 
-// FIXME: replace with `derive(Copy)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<T: Ord + ?Sized> Copy for Natural<T> {}
 
-// FIXME: replace with `derive(Default)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<T: Ord + ?Sized> Default for Natural<T> {
-    fn default() -> Natural<T> { natural() }
+    fn default() -> Self { natural() }
 }
 
-// FIXME: replace with `derive(PartialEq)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<T: Ord + ?Sized> PartialEq for Natural<T> {
-    fn eq(&self, _other: &Natural<T>) -> bool { true }
+    fn eq(&self, _other: &Self) -> bool { true }
 }
 
-// FIXME: replace with `derive(Eq)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<T: Ord + ?Sized> Eq for Natural<T> {}
 
-// FIXME: replace with `derive(Debug)` once
-// https://github.com/rust-lang/rust/issues/19839 is fixed
 impl<T: Ord + ?Sized> Debug for Natural<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "Natural") }
 }
@@ -562,22 +498,14 @@ impl<T: Ord + ?Sized> Debug for Natural<T> {
 #[derive(Clone, Copy, Default, PartialEq, Eq, Debug)]
 pub struct Rev<C>(C);
 
-impl<C, Lhs: ?Sized, Rhs: ?Sized> Compare<Lhs, Rhs> for Rev<C> where C: Compare<Lhs, Rhs> {
-    fn compare(&self, lhs: &Lhs, rhs: &Rhs) -> Ordering {
-        self.0.compare(lhs, rhs).reverse()
-    }
-
-    fn compares_lt(&self, lhs: &Lhs, rhs: &Rhs) -> bool { self.0.compares_gt(lhs, rhs) }
-
-    fn compares_le(&self, lhs: &Lhs, rhs: &Rhs) -> bool { self.0.compares_ge(lhs, rhs) }
-
-    fn compares_ge(&self, lhs: &Lhs, rhs: &Rhs) -> bool { self.0.compares_le(lhs, rhs) }
-
-    fn compares_gt(&self, lhs: &Lhs, rhs: &Rhs) -> bool { self.0.compares_lt(lhs, rhs) }
-
-    fn compares_eq(&self, lhs: &Lhs, rhs: &Rhs) -> bool { self.0.compares_eq(lhs, rhs) }
-
-    fn compares_ne(&self, lhs: &Lhs, rhs: &Rhs) -> bool { self.0.compares_ne(lhs, rhs) }
+impl<C, L: ?Sized, R: ?Sized> Compare<L, R> for Rev<C> where C: Compare<L, R> {
+    fn compare(&self, l: &L, r: &R) -> Ordering { self.0.compare(l, r).reverse() }
+    fn compares_lt(&self, l: &L, r: &R) -> bool { self.0.compares_gt(l, r) }
+    fn compares_le(&self, l: &L, r: &R) -> bool { self.0.compares_ge(l, r) }
+    fn compares_ge(&self, l: &L, r: &R) -> bool { self.0.compares_le(l, r) }
+    fn compares_gt(&self, l: &L, r: &R) -> bool { self.0.compares_lt(l, r) }
+    fn compares_eq(&self, l: &L, r: &R) -> bool { self.0.compares_eq(l, r) }
+    fn compares_ne(&self, l: &L, r: &R) -> bool { self.0.compares_ne(l, r) }
 }
 
 /// A comparator that swaps another's parameters, maintaining the underlying ordering.
@@ -589,20 +517,14 @@ impl<C, Lhs: ?Sized, Rhs: ?Sized> Compare<Lhs, Rhs> for Rev<C> where C: Compare<
 #[derive(Clone, Copy, Default, PartialEq, Eq, Debug)]
 pub struct Swap<C>(C);
 
-impl<C, Lhs: ?Sized, Rhs: ?Sized> Compare<Rhs, Lhs> for Swap<C>
-    where C: Compare<Lhs, Rhs> {
+impl<C, L: ?Sized, R: ?Sized> Compare<R, L> for Swap<C>
+    where C: Compare<L, R> {
 
-    fn compare(&self, rhs: &Rhs, lhs: &Lhs) -> Ordering { self.0.compare(lhs, rhs) }
-
-    fn compares_lt(&self, rhs: &Rhs, lhs: &Lhs) -> bool { self.0.compares_lt(lhs, rhs) }
-
-    fn compares_le(&self, rhs: &Rhs, lhs: &Lhs) -> bool { self.0.compares_le(lhs, rhs) }
-
-    fn compares_ge(&self, rhs: &Rhs, lhs: &Lhs) -> bool { self.0.compares_ge(lhs, rhs) }
-
-    fn compares_gt(&self, rhs: &Rhs, lhs: &Lhs) -> bool { self.0.compares_gt(lhs, rhs) }
-
-    fn compares_eq(&self, rhs: &Rhs, lhs: &Lhs) -> bool { self.0.compares_eq(lhs, rhs) }
-
-    fn compares_ne(&self, rhs: &Rhs, lhs: &Lhs) -> bool { self.0.compares_ne(lhs, rhs) }
+    fn compare(&self, r: &R, l: &L) -> Ordering { self.0.compare(l, r) }
+    fn compares_lt(&self, r: &R, l: &L) -> bool { self.0.compares_lt(l, r) }
+    fn compares_le(&self, r: &R, l: &L) -> bool { self.0.compares_le(l, r) }
+    fn compares_ge(&self, r: &R, l: &L) -> bool { self.0.compares_ge(l, r) }
+    fn compares_gt(&self, r: &R, l: &L) -> bool { self.0.compares_gt(l, r) }
+    fn compares_eq(&self, r: &R, l: &L) -> bool { self.0.compares_eq(l, r) }
+    fn compares_ne(&self, r: &R, l: &L) -> bool { self.0.compares_ne(l, r) }
 }
