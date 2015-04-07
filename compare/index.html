@@ -43,7 +43,7 @@
     <section id='main' class="content mod">
 <h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>compare</a><wbr></span><span class='out-of-band'><a href='stability.html'>[stability]</a> <span id='render-detail'>
             <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-0' href='../src/compare/lib.rs.html#1-608'>[src]</a></span></h1>
+        </span><a id='src-0' href='../src/compare/lib.rs.html#1-530'>[src]</a></span></h1>
 <div class='docblock'><p>Comparators.</p>
 
 <p>A comparator is any type that implements the <a href="trait.Compare.html"><code>Compare</code></a> trait,
@@ -98,16 +98,16 @@ example, all comparators can be <a href="trait.Compare.html#method.rev">reversed
 </pre>
 
 <p>It is possible to implement a comparator that is not based on the natural ordering of
-a type by using a closure of type <code>Fn(&amp;Lhs, &amp;Rhs) -&gt; Ordering</code>. For example, vectors
+a type by using a closure of type <code>Fn(&amp;L, &amp;R) -&gt; Ordering</code>. For example, slices
 can be compared by their length instead of their contents:</p>
 <pre id='rust-example-rendered' class='rust '>
 <span class='kw'>use</span> <span class='ident'>compare</span>::<span class='ident'>Compare</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::<span class='ident'>Ordering</span>::{<span class='ident'>Less</span>, <span class='ident'>Greater</span>};
 
-<span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>];
-<span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>4</span>, <span class='number'>5</span>];
+<span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> [<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>3</span>];
+<span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> [<span class='number'>4</span>, <span class='number'>5</span>];
 
-<span class='kw'>let</span> <span class='ident'>cmp</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>lhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span><span class='op'>|</span> <span class='ident'>lhs</span>.<span class='ident'>len</span>().<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>rhs</span>.<span class='ident'>len</span>());
+<span class='kw'>let</span> <span class='ident'>cmp</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>l</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>i32</span>], <span class='ident'>r</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>i32</span>]<span class='op'>|</span> <span class='ident'>l</span>.<span class='ident'>len</span>().<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>r</span>.<span class='ident'>len</span>());
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>cmp</span>.<span class='ident'>compare</span>(<span class='kw-2'>&amp;</span><span class='ident'>a</span>, <span class='kw-2'>&amp;</span><span class='ident'>b</span>), <span class='ident'>Greater</span>);
 
 <span class='kw'>let</span> <span class='ident'>cmp</span> <span class='op'>=</span> <span class='ident'>cmp</span>.<span class='ident'>rev</span>();
@@ -127,12 +127,12 @@ equal, by another:</p>
 <span class='kw'>let</span> <span class='ident'>ruff2</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>Pet</span> { <span class='ident'>name</span>: <span class='string'>&quot;Ruff&quot;</span>, <span class='ident'>age</span>: <span class='number'>2</span> };
 <span class='kw'>let</span> <span class='ident'>fido3</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>Pet</span> { <span class='ident'>name</span>: <span class='string'>&quot;Fido&quot;</span>, <span class='ident'>age</span>: <span class='number'>3</span> };
 
-<span class='kw'>let</span> <span class='ident'>name_cmp</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>lhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>Pet</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>Pet</span><span class='op'>|</span> <span class='ident'>lhs</span>.<span class='ident'>name</span>.<span class='ident'>cmp</span>(<span class='ident'>rhs</span>.<span class='ident'>name</span>);
+<span class='kw'>let</span> <span class='ident'>name_cmp</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>l</span>: <span class='kw-2'>&amp;</span><span class='ident'>Pet</span>, <span class='ident'>r</span>: <span class='kw-2'>&amp;</span><span class='ident'>Pet</span><span class='op'>|</span> <span class='ident'>l</span>.<span class='ident'>name</span>.<span class='ident'>cmp</span>(<span class='ident'>r</span>.<span class='ident'>name</span>);
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>name_cmp</span>.<span class='ident'>compare</span>(<span class='ident'>fido4</span>, <span class='ident'>ruff2</span>), <span class='ident'>Less</span>);
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>name_cmp</span>.<span class='ident'>compare</span>(<span class='ident'>fido4</span>, <span class='ident'>fido3</span>), <span class='ident'>Equal</span>);
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>name_cmp</span>.<span class='ident'>compare</span>(<span class='ident'>ruff2</span>, <span class='ident'>fido3</span>), <span class='ident'>Greater</span>);
 
-<span class='kw'>let</span> <span class='ident'>age_cmp</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>lhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>Pet</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>Pet</span><span class='op'>|</span> <span class='ident'>lhs</span>.<span class='ident'>age</span>.<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>rhs</span>.<span class='ident'>age</span>);
+<span class='kw'>let</span> <span class='ident'>age_cmp</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>l</span>: <span class='kw-2'>&amp;</span><span class='ident'>Pet</span>, <span class='ident'>r</span>: <span class='kw-2'>&amp;</span><span class='ident'>Pet</span><span class='op'>|</span> <span class='ident'>l</span>.<span class='ident'>age</span>.<span class='ident'>cmp</span>(<span class='kw-2'>&amp;</span><span class='ident'>r</span>.<span class='ident'>age</span>);
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>age_cmp</span>.<span class='ident'>compare</span>(<span class='ident'>fido4</span>, <span class='ident'>ruff2</span>), <span class='ident'>Greater</span>);
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>age_cmp</span>.<span class='ident'>compare</span>(<span class='ident'>fido4</span>, <span class='ident'>fido3</span>), <span class='ident'>Greater</span>);
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>age_cmp</span>.<span class='ident'>compare</span>(<span class='ident'>ruff2</span>, <span class='ident'>fido3</span>), <span class='ident'>Less</span>);
@@ -147,7 +147,7 @@ equal, by another:</p>
 <a href="struct.Extract.html">key-extraction logic</a> can be factored out, simplifying the
 previous example:</p>
 <pre id='rust-example-rendered' class='rust '>
-<span class='kw'>use</span> <span class='ident'>compare</span>::{<span class='ident'>Compare</span>, <span class='ident'>Extract</span>, <span class='ident'>natural</span>};
+<span class='kw'>use</span> <span class='ident'>compare</span>::{<span class='ident'>Compare</span>, <span class='ident'>Extract</span>};
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>::<span class='ident'>Ordering</span>::{<span class='ident'>Less</span>, <span class='ident'>Greater</span>};
 
 <span class='kw'>struct</span> <span class='ident'>Pet</span> { <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>, <span class='ident'>age</span>: <span class='ident'>u8</span> }
@@ -156,8 +156,8 @@ previous example:</p>
 <span class='kw'>let</span> <span class='ident'>ruff2</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>Pet</span> { <span class='ident'>name</span>: <span class='string'>&quot;Ruff&quot;</span>, <span class='ident'>age</span>: <span class='number'>2</span> };
 <span class='kw'>let</span> <span class='ident'>fido3</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>Pet</span> { <span class='ident'>name</span>: <span class='string'>&quot;Fido&quot;</span>, <span class='ident'>age</span>: <span class='number'>3</span> };
 
-<span class='kw'>let</span> <span class='ident'>name_age_cmp</span> <span class='op'>=</span> <span class='ident'>Extract</span>::<span class='ident'>new</span>(<span class='op'>|</span><span class='ident'>p</span>: <span class='kw-2'>&amp;</span><span class='ident'>Pet</span><span class='op'>|</span> <span class='ident'>p</span>.<span class='ident'>name</span>, <span class='ident'>natural</span>())
-             .<span class='ident'>then</span>(<span class='ident'>Extract</span>::<span class='ident'>new</span>(<span class='op'>|</span><span class='ident'>p</span>: <span class='kw-2'>&amp;</span><span class='ident'>Pet</span><span class='op'>|</span> <span class='ident'>p</span>.<span class='ident'>age</span>, <span class='ident'>natural</span>()));
+<span class='kw'>let</span> <span class='ident'>name_age_cmp</span> <span class='op'>=</span> <span class='ident'>Extract</span>::<span class='ident'>new</span>(<span class='op'>|</span><span class='ident'>p</span>: <span class='kw-2'>&amp;</span><span class='ident'>Pet</span><span class='op'>|</span> <span class='ident'>p</span>.<span class='ident'>name</span>)
+             .<span class='ident'>then</span>(<span class='ident'>Extract</span>::<span class='ident'>new</span>(<span class='op'>|</span><span class='ident'>p</span>: <span class='kw-2'>&amp;</span><span class='ident'>Pet</span><span class='op'>|</span> <span class='ident'>p</span>.<span class='ident'>age</span>));
 
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>name_age_cmp</span>.<span class='ident'>compare</span>(<span class='ident'>fido4</span>, <span class='ident'>ruff2</span>), <span class='ident'>Less</span>);
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>name_age_cmp</span>.<span class='ident'>compare</span>(<span class='ident'>fido4</span>, <span class='ident'>fido3</span>), <span class='ident'>Greater</span>);
@@ -166,8 +166,8 @@ previous example:</p>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
                     <tr>
-                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.Borrow.html'
-                               title='compare::Borrow'>Borrow</a></td>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.Borrowing.html'
+                               title='compare::Borrowing'>Borrowing</a></td>
                         <td class='docblock short'><p>A comparator that borrows its parameters before comparing them.</p>
 </td>
                     </tr>
@@ -219,7 +219,7 @@ previous example:</p>
                     <tr>
                         <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.max.html'
                                title='compare::max'>max</a></td>
-                        <td class='docblock short'><p>Returns the maximum of two values according to the given comparator, or <code>rhs</code> if they
+                        <td class='docblock short'><p>Returns the maximum of two values according to the given comparator, or <code>r</code> if they
 are equal.</p>
 </td>
                     </tr>
@@ -227,7 +227,7 @@ are equal.</p>
                     <tr>
                         <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.min.html'
                                title='compare::min'>min</a></td>
-                        <td class='docblock short'><p>Returns the minimum of two values according to the given comparator, or <code>lhs</code> if they
+                        <td class='docblock short'><p>Returns the minimum of two values according to the given comparator, or <code>l</code> if they
 are equal.</p>
 </td>
                     </tr>
