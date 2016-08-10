@@ -126,11 +126,13 @@
 //! assert_eq!(name_age_cmp.compare(ruff2, fido3), Greater);
 //! ```
 
-use std::borrow::Borrow;
-use std::cmp::Ordering::{self, Less, Equal, Greater};
-use std::default::Default;
-use std::marker::PhantomData;
-use std::fmt::{self, Debug};
+#![no_std]
+
+use core::borrow::Borrow;
+use core::cmp::Ordering::{self, Less, Equal, Greater};
+use core::default::Default;
+use core::marker::PhantomData;
+use core::fmt::{self, Debug};
 
 /// Returns the maximum of two values according to the given comparator, or `r` if they
 /// are equal.
