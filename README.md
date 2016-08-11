@@ -6,7 +6,7 @@ To use `compare` with Cargo, add this to `Cargo.toml`:
 
 ```toml
 [dependencies]
-compare = "*"
+compare = "0.1"
 ```
 
 and this to the crate root:
